@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Layout, Text, Input, Button, Spinner, Icon } from '@ui-kitten/components';
+import { Layout, Text, Input, Spinner, Icon } from '@ui-kitten/components';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -7,11 +7,15 @@ import {
   View,
   StyleSheet,
   Keyboard,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
-
+import * as ImagePicker from 'expo-image-picker';
 import { useChatStore, ChatMessage } from '../../src/store/chatStore';
+import { getGeminiMessage } from '../../src/services/ai';
+import Markdown from 'react-native-markdown-display';
 // import { mockAIReply } from '../../src/services/ai';
 
 type DecoratedMessage = ChatMessage & {
@@ -82,9 +86,13 @@ function Bubble({ item }: { item: DecoratedMessage }) {
               {isUser ? '' : 'Asistente'}
             </Text>
           )}
-
-          <Text style={[styles.bubbleText, isUser && styles.userText]}>{item.content}</Text>
-
+          
+          <Text style={[styles.bubbleText, isUser && styles.userText]}>
+            <Markdown>
+              {item.content} 
+            </Markdown>
+          </Text>
+          
           <View
             style={[
               styles.timeRow,
@@ -170,8 +178,8 @@ export default function ChatScreen() {
     const placeholder = pushMessage({ role: 'assistant', content: 'Escribiendo…' });
 
     try {
-      const replyText = 'Esta es una respuesta simulada del asistente.';
-      // const replyText = await mockAIReply([...sorted, userMsg]);
+      // const replyText = 'Esta es una respuesta simulada del asistente.';
+      const replyText = await getGeminiMessage(userMsg.content);
       replaceMessage(placeholder.id, { content: replyText });
     } catch (e: any) {
       replaceMessage(placeholder.id, { content: 'Ocurrió un error obteniendo la respuesta.' });
@@ -192,6 +200,22 @@ export default function ChatScreen() {
     </View>
   );
 
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Se requieren permisos para acceder a la galería de imágenes.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+      const imageMessage = `![Imagen seleccionada](${uri})`;
+      setText((prev) => (prev ? prev + ' ' + imageMessage : imageMessage));
+    }
+  }
   return (
     <KeyboardAvoidingView
       style={styles.screen}
@@ -225,6 +249,7 @@ export default function ChatScreen() {
           ]}
           level="1"
         >
+          
           <View style={styles.inputWrapper}>
             <Input
               placeholder="Escribe tu mensaje…"
@@ -236,17 +261,28 @@ export default function ChatScreen() {
               size="large"
               textStyle={styles.inputText}
               style={styles.input}
+              accessoryLeft={(iconProps) => (
+                <TouchableOpacity onPress={pickImage} style={styles.iconButton}>
+                  <Icon name="camera-outline" fill="#3366FF" style={styles.icon} />
+                </TouchableOpacity>
+              )}
+              accessoryRight={(iconProps) => (
+                <TouchableOpacity
+                  onPress={send}
+                  disabled={!text.trim() || isThinking}
+                  style={styles.iconButton}
+                >
+                  {isThinking ? (
+                    <Spinner size="small" />
+                  ) : (
+                    <Icon name="paper-plane" fill="#3366FF" style={styles.icon} />
+                  )}
+                </TouchableOpacity>
+
+              )}
             />
           </View>
-          <Button
-            onPress={send}
-            disabled={!text.trim() || isThinking}
-            appearance="filled"
-            size="large"
-            style={styles.sendButton}
-          >
-            {isThinking ? <Spinner size="tiny" /> : 'Enviar'}
-          </Button>
+          
         </Layout>
       </Layout>
     </KeyboardAvoidingView>
@@ -380,7 +416,7 @@ const styles = StyleSheet.create({
   },
   composer: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     gap: 12,
     paddingHorizontal: 16,
     paddingTop: 14,
@@ -405,8 +441,11 @@ const styles = StyleSheet.create({
   inputText: {
     fontSize: 15,
   },
-  sendButton: {
-    borderRadius: 16,
-    paddingHorizontal: 18,
+  iconButton: {
+    padding: 8,
+  },
+  icon: {
+    width: 24,
+    height: 24,
   },
 });
