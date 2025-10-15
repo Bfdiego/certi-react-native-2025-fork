@@ -7,27 +7,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { Search } from '../../src/components/Search';
 import { SearchBar } from '../../src/components/SearchBar';
 import { useLocation } from '../../src/hooks/useLocation';
+import { useMapCentering } from '../../src/hooks/useMapCentering';
+import { GoToLocationFab } from '../../src/components/GoToLocationFab';
+import { AppMapView } from '../../src/components/CustomMapView';
 
 export default function MapScreen() {
   const mapRef = useRef<MapView>(null);
   const { location, setLocation, loading } = useLocation();
-  
+  const { centerOn } = useMapCentering(mapRef);
   const [jumping, setJumping] = useState(false);
   const [searchText, setSearchText] = useState('');  
-
-  const centerOn = useCallback((lat: number, lng: number, animate = true) => {
-    const region = {
-      latitude: lat,
-      longitude: lng,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01
-    };
-    if (animate) {
-      mapRef.current?.animateToRegion(region, 600);
-    } else {
-      mapRef.current?.animateToRegion(region);
-    }
-  }, []);
 
   const goToMyLocation = useCallback(async () => {
     try {
@@ -56,43 +45,12 @@ export default function MapScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.container}>
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          showsUserLocation
-          showsMyLocationButton={Platform.OS === 'android'}
-        >
-          {location && (
-            <Marker
-              coordinate={{
-                latitude: location.latitude,
-                longitude: location.longitude,
-              }}
-              title="Estás aquí"
-            />
-          )}
-        </MapView>
+        <AppMapView mapRef={mapRef} location={location} />
         <Search>
-          <Text>Feria 16 de Julio</Text>
+          <Text>Hola Bola</Text>
           <SearchBar value={searchText} onChange={setSearchText} />
         </Search>
-        <Pressable
-          onPress={goToMyLocation}
-          style={({ pressed }) => [
-            styles.fab,
-            pressed && { transform: [{ scale: 0.98 }], opacity: 0.9 },
-          ]}
-          android_ripple={{ color: 'rgba(0,0,0,0.1)', borderless: false }}
-          accessibilityRole="button"
-          accessibilityLabel="Ir a mi ubicación"
-          testID="btn-my-location"
-        >
-          {jumping ? (
-            <ActivityIndicator />
-          ) : (
-            <Ionicons name="locate" size={22} />
-          )}
-        </Pressable>
+        <GoToLocationFab onPress={goToMyLocation} jumping={jumping} />
       </View>
     </SafeAreaView>
   );
@@ -102,21 +60,4 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
   container: { flex: 1 },
   map: { flex: 1 },
-
-  fab: {
-    position: 'absolute',
-    right: 16,
-    bottom: 24,
-    height: 48,
-    width: 48,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    elevation: 6,
-  },
 });
