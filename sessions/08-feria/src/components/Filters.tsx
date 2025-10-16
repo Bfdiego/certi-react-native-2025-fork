@@ -3,10 +3,17 @@ import { CATEGORIES } from '../data/categories';
 import React,  { useState }  from 'react';
 import { Filter } from './Filter';
 export const Filters = () => {
-    const [categories, setCategory] = useState(CATEGORIES);
-    const selectCategory = (category: { name: string, active: boolean}) => {
-        console.log('hiciste tap en ', category);
-    }
+    const [categories, setCategories] = useState(CATEGORIES);
+    const selectCategories = (category: { name: string; active: boolean }) => {
+        const newCategories = categories.map(cat => {
+          if (cat.name === category.name) {
+            return { ...cat, active: !cat.active };
+          }
+          return cat;
+        });
+        setCategories(newCategories);
+      };
+
     return (
         <View style={styles.container}>
             {
@@ -14,9 +21,10 @@ export const Filters = () => {
                     (category, index) => {
                         return (
                             <Filter
+                                key={`${category.name}-${index}`}
                                 cat={category}
                                 index={index}
-                                selectCategory={selectCategory}
+                                selectCategory={selectCategories}
                             />
                         )
 
