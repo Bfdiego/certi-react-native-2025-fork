@@ -3623,6 +3623,11 @@ ignore@^5.3.1:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.3.2.tgz#3cd40e729f3643fd87cb04e50bf0eb722bc596f5"
   integrity sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==
 
+image-picker@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/image-picker/-/image-picker-0.3.1.tgz#6af8b50a2ffc98df5d4b9451373e39d2c6151485"
+  integrity sha512-mbT/R7LcbXxhIKoDCQAjjejzAja6+JnBlSOa7I7SnF1sMen2lIh2WCfq3JjBD+cCfxKZHks3ZxO9cQ0TFj1aOQ==
+
 image-size@^1.0.2:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/image-size/-/image-size-1.2.1.tgz#ee118aedfe666db1a6ee12bed5821cde3740276d"
