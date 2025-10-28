@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "08-feria",
-    "slug": "08-feria",
+    "slug": "feria",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -30,7 +30,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-web-browser"
-    ]
+      "expo-web-browser",
+      "expo-notifications"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "931e863c-ca71-4e79-bd3f-c7413f790fd7"
+      }
+    },
+    "owner": "bfdiego"
   }
 }
